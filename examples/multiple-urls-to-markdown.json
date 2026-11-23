@@ -1,0 +1,175 @@
+{
+  "name": "Nstdata Crawl · Multiple URLs → Markdown",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "294e7251-07d2-49ba-aa7a-40854cec8f42",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\"rows\": [{\"rowId\": \"row-01\", \"url\": \"https://example.org/\"}, {\"rowId\": \"row-02\", \"url\": \"https://www.iana.org/help/example-domains\"}]}",
+        "options": {}
+      },
+      "id": "1e122cf8-0cf8-4317-9d5d-0642a1e9ab2e",
+      "name": "Example inputs",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "rows",
+        "options": {}
+      },
+      "id": "e15ae190-5f17-4684-a531-a421d4ccb9ea",
+      "name": "URL rows",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "scrape",
+        "url": "={{ $json.url }}",
+        "formats": [
+          "markdown"
+        ],
+        "resultMode": "wait",
+        "options": {
+          "waitSeconds": 90
+        }
+      },
+      "id": "82c3e459-12d7-4044-adab-a7247384ab17",
+      "name": "Scrape each URL",
+      "type": "n8n-nodes-nstdata.nstdataCrawl",
+      "typeVersion": 1,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4c2146c-a1cc-4fec-914a-db06f3797921",
+              "name": "rowId",
+              "value": "={{ $('URL rows').item.json.rowId }}",
+              "type": "string"
+            },
+            {
+              "id": "96d36937-b0dd-403e-95aa-c60368700eff",
+              "name": "sourceUrl",
+              "value": "={{ $('URL rows').item.json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "f7f28f43-31b8-4ddc-b1e0-4b564a7193c0",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "821cba85-353f-4625-b819-d5d9c831d67a",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "ec2987c4-49b1-4778-9b8a-db21857e50b0",
+              "name": "taskId",
+              "value": "={{ $json.taskId }}",
+              "type": "string"
+            },
+            {
+              "id": "dbd7293c-b09e-4234-bec1-9cb5be8a026b",
+              "name": "markdown",
+              "value": "={{ $json.markdown }}",
+              "type": "string"
+            },
+            {
+              "id": "a9349fa0-be7c-465d-aeca-501b527b13df",
+              "name": "characters",
+              "value": "={{ $json.markdown.length }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2619b40-04a9-4bc7-b0ef-c8177e33d601",
+      "name": "Downstream Markdown",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        910,
+        -90
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Example inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Example inputs": {
+      "main": [
+        [
+          {
+            "node": "URL rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL rows": {
+      "main": [
+        [
+          {
+            "node": "Scrape each URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape each URL": {
+      "main": [
+        [
+          {
+            "node": "Downstream Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
