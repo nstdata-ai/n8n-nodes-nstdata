@@ -1,0 +1,48 @@
+{
+  "name": "n8n-nodes-nstdata",
+  "version": "0.1.1",
+  "description": "Scrape web pages with Nstdata Crawl and pass Markdown to the next n8n node",
+  "keywords": [
+    "n8n-community-node-package"
+  ],
+  "files": [
+    "dist",
+    "examples",
+    "README.zh-CN.md"
+  ],
+  "scripts": {
+    "build": "n8n-node build",
+    "test": "npm run build && node --test test/*.test.cjs",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "0.57.4",
+    "eslint": "9.39.4",
+    "n8n-workflow": "2.47.1",
+    "typescript": "~5.9.3"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/NstdataCrawlApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/NstdataCrawl/NstdataCrawl.node.js"
+    ],
+    "strict": true
+  },
+  "license": "MIT",
+  "author": {
+    "name": "nstdata-ai",
+    "email": "developer@nstdata.ai"
+  },
+  "homepage": "https://docs.nstdata.io/docs/crawl",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nstdata-ai/n8n-nodes-nstdata.git"
+  }
+}
