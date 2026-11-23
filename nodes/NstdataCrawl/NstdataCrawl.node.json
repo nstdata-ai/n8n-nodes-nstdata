@@ -1,0 +1,14 @@
+{
+  "node": "n8n-nodes-nstdata.nstdataCrawl",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Data & Storage"],
+  "resources": {
+    "credentialDocumentation": [
+      { "url": "https://app.nstdata.io/" }
+    ],
+    "primaryDocumentation": [
+      { "url": "https://docs.nstdata.io/docs/crawl" }
+    ]
+  }
+}
