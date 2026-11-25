@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -17,6 +17,8 @@ try {
         '--no-audit', '--no-fund', '--no-package-lock', archive], { stdio: 'inherit' });
     symlinkSync(realpathSync(path.join(root, 'node_modules/n8n-workflow')), path.join(temp, 'node_modules/n8n-workflow'), 'dir');
     const installed = path.join(temp, 'node_modules', expected.name);
+    assert.deepEqual(readdirSync(installed).filter(file => /\.md$/i.test(file)).sort(), ['README.md'],
+        'Ship only the English README at the package root');
     const load = createRequire(path.join(installed, 'package.json'));
     const pkg = load('./package.json');
     assert.equal(pkg.name, expected.name);
