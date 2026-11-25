@@ -1,6 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { NstdataCrawl } = require('../dist/nodes/NstdataCrawl/NstdataCrawl.node.js');
+const { createRequire } = require('node:module');
+const path = require('node:path');
+const loadPackage = createRequire(path.join(process.env.NSTDATA_TEST_PACKAGE_ROOT || path.resolve(__dirname, '..'), 'package.json'));
+const { NstdataCrawl } = loadPackage('./dist/nodes/NstdataCrawl/NstdataCrawl.node.js');
 
 function context(parameters, request, count = 1) {
 	return {
@@ -69,7 +72,7 @@ test('return the existing task ID when the polling window expires', async () => 
 });
 
 test('the default connection uses the saved Crawl credential and only tests account information', async () => {
-	const { NstdataCrawlApi } = require('../dist/credentials/NstdataCrawlApi.credentials.js');
+	const { NstdataCrawlApi } = loadPackage('./dist/credentials/NstdataCrawlApi.credentials.js');
 	const credential = new NstdataCrawlApi();
 	const description = new NstdataCrawl().description;
 	const auth = description.properties.find((p) => p.name === 'authType').default;
