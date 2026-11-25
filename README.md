@@ -1,6 +1,6 @@
 # Nstdata Crawl for n8n
 
-[简体中文](README.zh-CN.md)
+[Simplified Chinese guide](https://github.com/nstdata-ai/n8n-nodes-nstdata/blob/main/GUIDE.zh-CN.md)
 
 Turn a URL from a spreadsheet, webhook or previous n8n step into Markdown, HTML or a list of links. **Nstdata Crawl** submits one page per incoming item. You can wait for the content in the same step or retrieve it later using its task ID.
 
