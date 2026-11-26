@@ -55,7 +55,7 @@
       },
       "id": "82c3e459-12d7-4044-adab-a7247384ab17",
       "name": "Scrape each URL",
-      "type": "n8n-nodes-nstdata.nstdataCrawl",
+      "type": "@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl",
       "typeVersion": 1,
       "position": [
         660,

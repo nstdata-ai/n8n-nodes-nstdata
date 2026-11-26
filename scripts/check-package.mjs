@@ -38,6 +38,10 @@ try {
     assert.equal(codex.node, pkg.name + '.nstdataCrawl');
     const workflow = load('./examples/multiple-urls-to-markdown.json');
     assert.ok(workflow.nodes.some(node => node.type === codex.node));
+    const coffee = JSON.parse(readFileSync(path.join(root, 'docs/workflows/coffee-shelf.n8n.json'), 'utf8'));
+    const coffeeNodes = coffee.nodes.filter(node => node.type.endsWith('.nstdataCrawl'));
+    assert.deepEqual(coffeeNodes.map(node => node.type), [codex.node, codex.node]);
+    assert.ok(coffee.nodes.every(node => !node.credentials), 'Attach credentials after importing the template');
     for (const file of ['README.md', 'LICENSE']) assert.ok(readFileSync(path.join(installed, file)).length);
     execFileSync(process.execPath, ['--test', path.join(root, 'test/crawl.test.cjs')], {
         env: { ...process.env, NSTDATA_TEST_PACKAGE_ROOT: installed }, stdio: 'inherit',
