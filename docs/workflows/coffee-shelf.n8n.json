@@ -1,0 +1,253 @@
+{
+  "name": "Nstdata Crawl · 咖啡货架观察",
+  "active": false,
+  "nodes": [
+    {
+      "name": "活动现场运行",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "id": "af2defc6-4dcb-48ea-ab02-b39348dd5cf5",
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "每天 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "id": "1f00c4da-30b0-4f06-82b1-f6c5eae2055b",
+      "position": [
+        0,
+        175
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "读取品牌在售目录",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "id": "924b2489-538c-44eb-b39b-2baee019febf",
+      "position": [
+        235,
+        60
+      ],
+      "parameters": {
+        "url": "https://counterculturecoffee.com/collections/coffee/products.json?limit=40",
+        "options": {
+          "timeout": 25000
+        }
+      }
+    },
+    {
+      "name": "选出三款在售咖啡",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "id": "ef77d665-a1b8-4ca6-b9d4-49849f185c61",
+      "position": [
+        465,
+        60
+      ],
+      "parameters": {
+        "jsCode": "const products = $input.first().json.products;\nif (!Array.isArray(products)) throw new Error('商店目录没有返回商品列表');\nconst selected = [];\nfor (const p of products) {\n  if (p.product_type !== 'Coffee' || !/^[a-z0-9-]+$/.test(p.handle)) continue;\n  const v = p.variants.find(v => v.available && /\\b12\\s*oz\\b/i.test(v.title));\n  if (!v) continue;\n  selected.push({json: {title:p.title, url:'https://counterculturecoffee.com/products/'+p.handle, price:v.price, size:v.title, image:p.images[0]?.src || ''}, pairedItem:{item:0}});\n  if (selected.length === 3) break;\n}\nif (!selected.length) throw new Error('当前目录没有可售的 12 oz 咖啡');\nreturn selected;\n"
+      }
+    },
+    {
+      "name": "Nstdata Crawl · 读取商品页",
+      "type": "@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl",
+      "typeVersion": 1,
+      "id": "9e17b84b-55e6-4eb0-9669-6b3b31251cb5",
+      "position": [
+        700,
+        60
+      ],
+      "parameters": {
+        "authType": "nstdataCrawlApi",
+        "operation": "scrape",
+        "url": "={{ $json.url }}",
+        "formats": [
+          "markdown"
+        ],
+        "resultMode": "wait",
+        "options": {
+          "waitSeconds": 90,
+          "onlyMainContent": false
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "核对已有任务",
+      "type": "@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl",
+      "typeVersion": 1,
+      "id": "3f07c078-ccef-46a7-a7d1-69f5992bf9a8",
+      "position": [
+        920,
+        60
+      ],
+      "parameters": {
+        "authType": "nstdataCrawlApi",
+        "operation": "getResult",
+        "taskId": "={{ $json.taskId ?? '' }}",
+        "resolveRefs": "={{ !$json.markdown }}"
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "生成咖啡简报",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "id": "0b362237-f33f-4e50-89a9-b8e351cf2a6a",
+      "position": [
+        1140,
+        60
+      ],
+      "parameters": {
+        "jsCode": "const catalog = $('选出三款在售咖啡').all().map(x=>x.json);\nconst checked = new Map($input.all().map(x=>[x.json.taskId,x.json]));\nconst results = new Map($('Nstdata Crawl · 读取商品页').all().map(x=>{\n  const initial=x.json, latest=checked.get(initial.taskId);\n  return [initial.url,initial.markdown || !latest?.markdown ? initial : latest];\n}));\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nconst dict = [\n  [/chocolat(e|y)/i,'巧克力'],[/blueberr(y|ies)/i,'蓝莓'],[/marmalade/i,'柑橘果酱'],[/caramel/i,'焦糖'],[/\\bnutty\\b|hazelnut/i,'坚果'],[/floral/i,'花香'],[/\\bcitrus\\b/i,'柑橘'],[/stone fruit/i,'核果'],[/molasses/i,'糖蜜'],[/jasmine/i,'茉莉'],[/peach/i,'桃子'],[/black tea/i,'红茶'],[/lemon/i,'柠檬'],[/berry|berries/i,'浆果']\n];\nfunction describe(markdown,title) {\n  const lines=markdown.split(/\\n/).map(s=>s.trim()).filter(s=>s && !s.startsWith('!') && !s.includes('](')).map(s=>s.replace(/^[>#*\\s-]+|[*_]/g,'').trim());\n  const anchor=lines.findIndex(s=>s.toLowerCase()===title.toLowerCase());\n  const scope=(anchor>=0?lines.slice(anchor):lines).slice(0,140);\n  const tasting=scope.find(s=>s.length<110 && /\\s[•·|]\\s/.test(s) && dict.some(([r])=>r.test(s)));\n  const descriptive=scope.filter(s=>s.length>65 && !/cookie|shipping|subscribe|add to cart|newsletter|privacy|checkout|function\\(/i.test(s));\n  const excerpt=descriptive.find(s=>s.toLowerCase().includes(title.toLowerCase()) || /notes of|flavo[u]?rs? of|hints of|coffee(s)? we purchase/i.test(s)) || descriptive[0] || '';\n  const tags=dict.filter(([r])=>r.test(tasting || excerpt)).map(x=>x[1]).filter((x,i,a)=>!(x==='浆果' && a.includes('蓝莓'))).slice(0,3);\n  const short=excerpt.split(/\\s+/).slice(0,17).join(' ');\n  return {tags,short:short+(short && short!==excerpt?'…':'')};\n}\nconst stamp=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());\nlet successes=0;\nconst cards=catalog.map((p,i)=>{\n  const r=results.get(p.url)||{};\n  const ok=r.status==='completed' && !!r.markdown?.trim() && !r.error && !(Number(r.metadata?.statusCode)>=400);\n  if(ok) successes++;\n  const {tags,short}=ok?describe(r.markdown,p.title):{tags:[],short:''};\n  const price=Number(p.price);\n  const photo=/^https:\\/\\/cdn\\.shopify\\.com\\//.test(p.image)?p.image:'';\n  return `<article><div class=\"photo\">${photo?`<img alt=\"${esc(p.title)}\" src=\"${esc(photo + (photo.includes('?')?'&':'?')+'width=650')}\">`:''}<b class=\"num\">0${i+1}</b></div><div class=\"body\"><div class=\"product\"><h2>${esc(p.title)}</h2><b class=\"price\">${Number.isFinite(price)?'$'+price.toFixed(2):'—'}</b></div><small>${esc(p.size)} · USD</small><div class=\"notes\">${tags.length?tags.map(t=>'<span>'+esc(t)+'</span>').join(''):(ok?'正文未识别出风味词':'本次未取得正文')}</div>${short?'<blockquote lang=\"en\">'+esc(short)+'</blockquote>':''}<footer><span>${ok?'Markdown · '+r.markdown.length.toLocaleString('en-US')+' 字符':(r.timedOut?'等待超时':'抓取未完成')}</span><a href=\"${esc(p.url)}\" target=\"_blank\" rel=\"noopener noreferrer\">商品原页 ↗</a></footer></div></article>`;\n});\nconst html=`<!doctype html><html lang=\"zh-CN\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>咖啡货架观察 · Nstdata Crawl</title><style>\n*{box-sizing:border-box}body{margin:0;background:#f9f6ed;color:#1c3028;font-family:\"PingFang SC\",\"Microsoft YaHei\",Arial,sans-serif}main{max-width:1380px;margin:auto;padding:25px 4.3vw 32px}header,.meta,footer,.product{display:flex;justify-content:space-between;align-items:center;gap:12px}header{padding-bottom:17px;border-bottom:1px solid #abb4a4}header strong{font:700 21px Georgia,serif}header span,.meta,small,footer{font-size:13px;color:#526257}.hero{padding:40px 0 27px}.kicker{letter-spacing:.16em;font-size:12px;color:#8a421f;font-weight:700}h1{font-size:clamp(38px,5.2vw,76px);letter-spacing:-.06em;margin:9px 0}.hero p{font-size:16px;margin:7px 0;color:#4e5f53;line-height:1.65}.meta{border-block:1px solid #b7c0ad;padding:10px 0;margin-bottom:18px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}article{background:#fffefa;border:1px solid #d6d9c9;display:flex;flex-direction:column}.photo{position:relative;height:clamp(165px,18vw,235px);overflow:hidden;background:#f1efe7}.photo img{width:100%;height:100%;object-fit:contain;display:block}.num{position:absolute;top:12px;left:12px;color:white;background:#243a32;padding:5px 9px;font:13px Georgia,serif}.body{padding:17px 18px 12px;flex:1;display:flex;flex-direction:column}.product{align-items:baseline}h2{font:600 clamp(21px,2.2vw,32px)/1.05 Georgia,serif;margin:0}.price{white-space:nowrap}.body small{margin:8px 0 14px}.notes{min-height:25px;font-size:13px;color:#61705a}.notes span{display:inline-block;background:#eaf0e0;color:#345039;border-radius:4px;padding:4px 8px;margin:0 5px 4px 0}blockquote{font:italic 15px/1.45 Georgia,serif;margin:12px 0 18px;color:#435344}footer{border-top:1px solid #e1e2d8;padding-top:11px;margin-top:auto;font-size:11px}footer a{color:#284d39;font-weight:700}.credit{font-size:12px;line-height:1.7;color:#5f6a5c;margin:16px 0 0}@media(max-width:740px){.grid{grid-template-columns:1fr}.photo{height:225px}.hero{padding-top:24px}.meta{gap:4px}header span{font-size:11px}}\n</style><main><header><strong>Nstdata Crawl</strong><span>零售观察 &nbsp; / &nbsp; 咖啡</span></header><section class=\"hero\"><div class=\"kicker\">COUNTER CULTURE COFFEE</div><h1>咖啡货架观察</h1><p>今天店里有哪些 12 oz 咖啡？看一眼价格，再从商品正文里读出风味。</p></section><div class=\"meta\"><span>美国商店 · 在售目录前 ${catalog.length} 款符合条件的咖啡</span><span>北京时间 ${esc(stamp)} &nbsp; · &nbsp; 已取得 ${successes}/${catalog.length} 篇正文</span></div><section class=\"grid\">${cards.join('')}</section><p class=\"credit\">商品图片、规格和美元标价来自品牌公开目录。风味词和英文摘录取自 Nstdata 本次读取的商品页 Markdown。价格以店铺结算页为准。</p></main></html>`;\nconst rows = catalog.map(p => {\n  const result = results.get(p.url) || {};\n  const ok = result.status === 'completed' && !!result.markdown?.trim() && !result.error && !(Number(result.metadata?.statusCode) >= 400);\n  const tags = ok ? describe(result.markdown, p.title).tags : [];\n  const tasting = tags.join('、') || (ok ? '未识别出风味词' : '本次未取得正文');\n  const url = esc(p.url);\n  const title = esc(p.title);\n  const photo = /^https:\\/\\/cdn\\.shopify\\.com\\//.test(p.image) ? p.image : '';\n  const thumbnail = photo ? `<a href=\"${url}\"><img src=\"${esc(photo + (photo.includes('?') ? '&' : '?') + 'width=260')}\" alt=\"${title} 商品图\" width=\"104\" style=\"display:block;width:104px;max-width:100%;height:auto;border:0\"></a>` : '';\n  return `<tr><td width=\"112\" valign=\"middle\" style=\"width:112px;padding:12px 8px 12px 0;border-bottom:1px solid #dcded2\">${thumbnail}</td><td valign=\"middle\" style=\"padding:12px 0 12px 8px;border-bottom:1px solid #dcded2\"><a href=\"${url}\" style=\"font: bold 20px Georgia,serif;color:#255b45\">${title}</a><br><span style=\"font-size:14px;color:#273b2f\">USD $${esc(p.price)} · ${esc(p.size)}</span><br><span style=\"font-size:14px;color:#4e6351\">${esc(tasting)}</span></td></tr>`;\n}).join('');\nconst emailHtml = `<div style=\"max-width:580px;margin:auto;font:15px/1.6 Arial,sans-serif;color:#223b31\"><p style=\"color:#566950\">Nstdata Crawl · Counter Culture Coffee</p><h2 style=\"margin-bottom:4px\">咖啡货架观察</h2><p>北京时间 ${esc(stamp)}，本次入选 ${catalog.length} 款在售咖啡，取得 ${successes} 篇商品正文。</p><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;border-collapse:collapse\">${rows}</table><p style=\"font-size:13px\">点击图片或商品名可查看原页。完整简报见附件 coffee-shelf.html。</p></div>`;\nreturn [{json:{html,emailHtml,stamp,pages:catalog.length,successfulPages:successes}}];\n"
+      }
+    },
+    {
+      "name": "生成 HTML 附件",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "id": "f9fb93e6-5cf3-4b80-804b-b000b2edfb22",
+      "position": [
+        1370,
+        60
+      ],
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "html",
+        "options": {
+          "fileName": "coffee-shelf.html"
+        }
+      }
+    },
+    {
+      "name": "发送咖啡简报",
+      "id": "e2406655-22c2-4002-9ca7-f5fbe0766da5",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1594,
+        60
+      ],
+      "parameters": {
+        "operation": "send",
+        "fromEmail": "Nstdata Crawl <reports@example.test>",
+        "toEmail": "coffee-team@example.test",
+        "subject": "=咖啡货架观察 · {{ $('生成咖啡简报').first().json.stamp }} · {{ $('生成咖啡简报').first().json.successfulPages }}/{{ $('生成咖啡简报').first().json.pages }} 篇正文",
+        "emailFormat": "html",
+        "html": "={{ $('生成咖啡简报').first().json.emailHtml }}",
+        "options": {
+          "fileAttachments": "data",
+          "appendAttribution": false
+        }
+      }
+    }
+  ],
+  "connections": {
+    "活动现场运行": {
+      "main": [
+        [
+          {
+            "node": "读取品牌在售目录",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "每天 09:00": {
+      "main": [
+        [
+          {
+            "node": "读取品牌在售目录",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "读取品牌在售目录": {
+      "main": [
+        [
+          {
+            "node": "选出三款在售咖啡",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "选出三款在售咖啡": {
+      "main": [
+        [
+          {
+            "node": "Nstdata Crawl · 读取商品页",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nstdata Crawl · 读取商品页": {
+      "main": [
+        [
+          {
+            "node": "核对已有任务",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "核对已有任务": {
+      "main": [
+        [
+          {
+            "node": "生成咖啡简报",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成咖啡简报": {
+      "main": [
+        [
+          {
+            "node": "生成 HTML 附件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成 HTML 附件": {
+      "main": [
+        [
+          {
+            "node": "发送咖啡简报",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Shanghai"
+  }
+}
