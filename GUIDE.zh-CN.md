@@ -14,9 +14,9 @@
 
 完整包名是 `@nstdata-ai/n8n-nodes-nstdata`。如果已经使用旧包，先导出并备份工作流。在 JSON 副本中，将 Nstdata 节点的 `type` 从 `n8n-nodes-nstdata.nstdataCrawl` 改成 `@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl`。在测试实例安装新包、导入副本，选好 Crawl 凭据并验证成功后，再切换生产环境。两个包注册的凭据类型相同，同一实例保持一个包启用。
 
-## 下载 0.1.1
+## 下载 0.1.2
 
-[下载仓库 ZIP](https://github.com/nstdata-ai/n8n-nodes-nstdata/archive/refs/heads/main.zip)，解压后在包含这个 README 的目录打开终端。ZIP 里有源码、安装脚本，以及已经编译好的 [0.1.1 安装包](https://github.com/nstdata-ai/n8n-nodes-nstdata/raw/refs/heads/main/downloads/nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz)，可以直接安装。下文命令适用于 macOS、Linux 或 Windows 的 WSL 环境。
+[下载仓库 ZIP](https://github.com/nstdata-ai/n8n-nodes-nstdata/archive/refs/heads/main.zip)，解压后在包含这个 README 的目录打开终端。ZIP 里有源码、安装脚本，以及已经编译好的 [0.1.2 安装包](https://github.com/nstdata-ai/n8n-nodes-nstdata/raw/refs/heads/main/downloads/nstdata-ai-n8n-nodes-nstdata-0.1.2.tgz)，可以直接安装。下文命令适用于 macOS、Linux 或 Windows 的 WSL 环境。
 
 以下专属节点安装步骤适用于已启用社区节点的**自托管 n8n**，需要能操作部署 n8n 的电脑或容器。已在 **n8n 2.47.4** 上验证。
 
@@ -27,7 +27,7 @@
 
 ```sh
 container=n8n-local
-archive=nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz
+archive=nstdata-ai-n8n-nodes-nstdata-0.1.2.tgz
 docker cp "downloads/$archive" "$container:/tmp/$archive"
 docker exec -i -u node "$container" sh -s -- "/tmp/$archive" /home/node/.n8n < scripts/install-local.sh
 docker restart "$container"
@@ -40,7 +40,7 @@ docker restart "$container"
 如果是用 Node.js 在本机启动 n8n，先等当前工作流执行完毕并停止服务。用平时启动 n8n 的系统用户，在解压后的仓库目录运行下列命令。若数据目录经过自定义，请把 `$HOME/.n8n` 换成实际存在的目录。脚本使用系统中的 `node`、`tar` 和 `sh`。
 
 ```sh
-sh scripts/install-local.sh downloads/nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz "$HOME/.n8n"
+sh scripts/install-local.sh downloads/nstdata-ai-n8n-nodes-nstdata-0.1.2.tgz "$HOME/.n8n"
 ```
 
 按原来的命令或服务管理方式重新启动 n8n，刷新编辑器并搜索 **Nstdata Crawl**。这两种安装方式都会把节点放到选定数据目录下的 `nodes/node_modules/@nstdata-ai/n8n-nodes-nstdata`。

@@ -14,9 +14,9 @@ We are preparing the npm release and plan to submit the node to n8n for verifica
 
 Install `@nstdata-ai/n8n-nodes-nstdata`. If you used the earlier unscoped package, export your workflows and keep a backup. In a test copy of each workflow JSON, change the Nstdata node's `type` from `n8n-nodes-nstdata.nstdataCrawl` to `@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl`. Install the scoped package on a test instance, import the copy and select the Crawl credential. Verify the workflow before switching production. Use one package at a time, since both register the same credential type.
 
-## Download 0.1.1
+## Download 0.1.2
 
-[Download the repository ZIP](https://github.com/nstdata-ai/n8n-nodes-nstdata/archive/refs/heads/main.zip), extract it, and open a terminal in the folder containing this README. The ZIP contains the source, an installation script and the ready-to-install [0.1.1 package](https://github.com/nstdata-ai/n8n-nodes-nstdata/raw/refs/heads/main/downloads/nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz). No build is needed. The commands below use a POSIX shell on macOS, Linux or WSL.
+[Download the repository ZIP](https://github.com/nstdata-ai/n8n-nodes-nstdata/archive/refs/heads/main.zip), extract it, and open a terminal in the folder containing this README. The ZIP contains the source, an installation script and the ready-to-install [0.1.2 package](https://github.com/nstdata-ai/n8n-nodes-nstdata/raw/refs/heads/main/downloads/nstdata-ai-n8n-nodes-nstdata-0.1.2.tgz). No build is needed. The commands below use a POSIX shell on macOS, Linux or WSL.
 
 The installation steps below cover **self-hosted n8n** with community nodes enabled. The node has been tested with n8n **2.47.4**. Installing a local file requires access to the n8n host or container.
 
@@ -27,7 +27,7 @@ The installation steps below cover **self-hosted n8n** with community nodes enab
 
 ```sh
 container=n8n-local
-archive=nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz
+archive=nstdata-ai-n8n-nodes-nstdata-0.1.2.tgz
 docker cp "downloads/$archive" "$container:/tmp/$archive"
 docker exec -i -u node "$container" sh -s -- "/tmp/$archive" /home/node/.n8n < scripts/install-local.sh
 docker restart "$container"
@@ -40,7 +40,7 @@ docker restart "$container"
 Stop n8n after active runs finish. As the same OS user that runs n8n, execute the following from the extracted repository. Replace `$HOME/.n8n` if you use a different data directory. It should already exist. The installer uses `node`, `tar` and `sh` from your environment.
 
 ```sh
-sh scripts/install-local.sh downloads/nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz "$HOME/.n8n"
+sh scripts/install-local.sh downloads/nstdata-ai-n8n-nodes-nstdata-0.1.2.tgz "$HOME/.n8n"
 ```
 
 Start n8n with your usual command or service manager, refresh the editor, and search for **Nstdata Crawl**. Both installation methods put the compiled package in `nodes/node_modules/@nstdata-ai/n8n-nodes-nstdata` inside the selected data directory.
