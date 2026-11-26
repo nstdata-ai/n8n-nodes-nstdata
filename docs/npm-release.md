@@ -12,7 +12,7 @@ The development repository is `nstdata-ai/n8n-nodes-nstdata`. The npm package is
 
 * Check npm Packages and Staged Packages, ownership and the intended first version. A public registry 404 does not establish name availability.
 * Verify or create the GitHub environment `npm-production`, require a reviewer, disable administrator bypass and permit only the branch `main`. Consider preventing self-review.
-* A new npm package requires a separately agreed bootstrap. The npm administrator handles interactive authentication. A local first publish consumes that version. For n8n verification, the submitted version must be published from GitHub Actions with provenance. Agree on the bootstrap plan before issuing version 0.1.1.
+* The scoped package is already public. For each new release, choose an unpublished version and publish the reviewed commit through GitHub Actions with provenance. The 0.1.1 version is already in the registry.
 * Configure the package's GitHub trusted publisher for owner `nstdata-ai`, repository `n8n-nodes-nstdata`, workflow `release.yml`, environment `npm-production`, with direct `npm publish` allowed. Arrange the first real run inside npm's activation window. Use the company's token-free publishing policy.
 
 ## Release and verify
