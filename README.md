@@ -4,11 +4,21 @@
 
 Turn a URL from a spreadsheet, webhook or previous n8n step into Markdown, HTML or a list of links. **Nstdata Crawl** submits one page per incoming item. You can wait for the content in the same step or retrieve it later using its task ID.
 
+## Choose your n8n setup
+
+The installation steps and coffee digest below run on self-hosted n8n with community nodes enabled. On n8n Cloud, check whether the owner or an admin can install **Nstdata Crawl** from the nodes panel. If it is unavailable, you can call the Crawl API with n8n’s built-in HTTP Request node and your own API key.
+
+We are preparing the npm release and plan to submit the node to n8n for verification shortly after publication. Once approved and listed, instance owners or admins with verified community nodes enabled can find and install **Nstdata Crawl** from the canvas.
+
+## Package name
+
+Install `@nstdata-ai/n8n-nodes-nstdata`. If you used the earlier unscoped package, export your workflows and keep a backup. In a test copy of each workflow JSON, change the Nstdata node's `type` from `n8n-nodes-nstdata.nstdataCrawl` to `@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl`. Install the scoped package on a test instance, import the copy and select the Crawl credential. Verify the workflow before switching production. Use one package at a time, since both register the same credential type.
+
 ## Download 0.1.1
 
-[Download the repository ZIP](https://github.com/nstdata-ai/n8n-nodes-nstdata/archive/refs/heads/main.zip), extract it, and open a terminal in the folder containing this README. The ZIP contains the source, an installation script and the ready-to-install [0.1.1 package](https://github.com/nstdata-ai/n8n-nodes-nstdata/raw/refs/heads/main/downloads/n8n-nodes-nstdata-0.1.1.tgz). No build is needed. The commands below use a POSIX shell on macOS, Linux or WSL.
+[Download the repository ZIP](https://github.com/nstdata-ai/n8n-nodes-nstdata/archive/refs/heads/main.zip), extract it, and open a terminal in the folder containing this README. The ZIP contains the source, an installation script and the ready-to-install [0.1.1 package](https://github.com/nstdata-ai/n8n-nodes-nstdata/raw/refs/heads/main/downloads/nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz). No build is needed. The commands below use a POSIX shell on macOS, Linux or WSL.
 
-This guide covers **self-hosted n8n** with community nodes enabled. The node has been tested with n8n **2.47.4**. Installing a local file requires access to the n8n host or container.
+The installation steps below cover **self-hosted n8n** with community nodes enabled. The node has been tested with n8n **2.47.4**. Installing a local file requires access to the n8n host or container.
 
 ## Install in Docker or Docker Compose
 
@@ -17,7 +27,7 @@ This guide covers **self-hosted n8n** with community nodes enabled. The node has
 
 ```sh
 container=n8n-local
-archive=n8n-nodes-nstdata-0.1.1.tgz
+archive=nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz
 docker cp "downloads/$archive" "$container:/tmp/$archive"
 docker exec -i -u node "$container" sh -s -- "/tmp/$archive" /home/node/.n8n < scripts/install-local.sh
 docker restart "$container"
@@ -30,10 +40,10 @@ docker restart "$container"
 Stop n8n after active runs finish. As the same OS user that runs n8n, execute the following from the extracted repository. Replace `$HOME/.n8n` if you use a different data directory. It should already exist. The installer uses `node`, `tar` and `sh` from your environment.
 
 ```sh
-sh scripts/install-local.sh downloads/n8n-nodes-nstdata-0.1.1.tgz "$HOME/.n8n"
+sh scripts/install-local.sh downloads/nstdata-ai-n8n-nodes-nstdata-0.1.1.tgz "$HOME/.n8n"
 ```
 
-Start n8n with your usual command or service manager, refresh the editor, and search for **Nstdata Crawl**. Both installation methods put the compiled package in `nodes/node_modules/n8n-nodes-nstdata` inside the selected data directory.
+Start n8n with your usual command or service manager, refresh the editor, and search for **Nstdata Crawl**. Both installation methods put the compiled package in `nodes/node_modules/@nstdata-ai/n8n-nodes-nstdata` inside the selected data directory.
 
 ## Connect your Nstdata account
 
@@ -55,7 +65,15 @@ Connect **Manual Trigger → Nstdata Crawl**. Choose **Scrape a Page**, enter `h
 
 If the wait expires, the node returns the existing task ID and `timedOut: true`. Query that ID with **Get Scrape Result**. Executing **Scrape a Page** again submits a new task and may use more credits. Check for a completed status before consuming text. If the API reports truncation, the item includes `truncated: true`.
 
-To try multiple URLs, use **Import from File** in n8n and select the [example workflow](examples/multiple-urls-to-markdown.json). Select your credential in **Scrape each URL** before running it. Each output item stays linked to its source row.
+## Example workflow · Daily coffee digest
+
+The workflow selects up to three available 12 oz coffees from Counter Culture Coffee, reads their product pages with Nstdata Crawl, and emails a digest with product images, prices, and an HTML attachment. The template uses Chinese node labels.
+
+1. Save the [coffee digest workflow JSON](https://github.com/nstdata-ai/n8n-nodes-nstdata/blob/main/docs/workflows/coffee-shelf.n8n.json) to your computer. On GitHub, open the file and click **Download raw file**.
+2. In a self-hosted n8n instance with **Nstdata Crawl** installed, create a blank workflow. Open **…** in the editor’s upper-right corner, choose **Import from File**, and select the JSON.
+3. Open the two Nstdata nodes, the first set to **Scrape a Page** and the second to **Get Scrape Result**. Select the same **Nstdata API Key** credential in both.
+4. Open the final **Send Email** node, choose your SMTP credential, and replace both example addresses with an authorized sender and your own recipient address. To preview without sending email, execute the **Code** node immediately before **Convert to File** and inspect **Output → JSON** for `html` and `emailHtml`.
+5. Select the **Manual Trigger** and click **Execute workflow** to test delivery. Open **coffee-shelf.html** in the received email. To enable the daily schedule afterwards, save and publish the workflow with its **09:00 Schedule Trigger** (Asia/Shanghai).
 
 ## Update or roll back
 
