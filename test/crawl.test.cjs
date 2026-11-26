@@ -9,7 +9,7 @@ function context(parameters, request, count = 1) {
 	return {
 		getInputData: () => Array.from({ length: count }, () => ({ json: {} })),
 		getNodeParameter: (name, i) => typeof parameters[name] === 'function' ? parameters[name](i) : parameters[name],
-		getNode: () => ({ name: 'Nstdata Crawl', type: 'n8n-nodes-nstdata.nstdataCrawl', typeVersion: 1, parameters: {} }),
+		getNode: () => ({ name: 'Nstdata Crawl', type: '@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl', typeVersion: 1, parameters: {} }),
 		getExecutionCancelSignal: () => undefined,
 		continueOnFail: () => true,
 		helpers: { httpRequestWithAuthentication: (_, options) => request(options) },

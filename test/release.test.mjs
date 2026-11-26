@@ -11,7 +11,7 @@ import { validateSource, checkEnvironment, verifyArtifact, checkPackage, checkRe
 const commit = 'a'.repeat(40);
 const env = { GITHUB_EVENT_NAME: 'workflow_dispatch', GITHUB_REPOSITORY: 'nstdata-ai/n8n-nodes-nstdata', GITHUB_REF: 'refs/heads/main',
     GITHUB_SHA: commit, RELEASE_COMMIT: commit, RELEASE_VERSION: '1.0.0', GH_TOKEN: 'fixture-token' };
-const pkg = { name: 'n8n-nodes-nstdata', version: '1.0.0', repository: { url: 'git+https://github.com/nstdata-ai/n8n-nodes-nstdata.git' }, publishConfig: { access: 'public', registry: 'https://registry.npmjs.org' } };
+const pkg = { name: '@nstdata-ai/n8n-nodes-nstdata', version: '1.0.0', repository: { url: 'git+https://github.com/nstdata-ai/n8n-nodes-nstdata.git' }, publishConfig: { access: 'public', registry: 'https://registry.npmjs.org' } };
 const response = (data, status = 200) => ({ status, json: async () => data });
 const environment = { can_admins_bypass: false,
     protection_rules: [{ type: 'required_reviewers', reviewers: [{ type: 'User' }] }],
@@ -75,7 +75,7 @@ test('release artifact binds the checked bytes to the workflow commit, version a
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'nstdata-release-test-'));
     try {
         const bytes = Buffer.from('fixture archive');
-        const manifest = { name: pkg.name, version: pkg.version, commit, filename: 'n8n-nodes-nstdata-1.0.0.tgz',
+        const manifest = { name: pkg.name, version: pkg.version, commit, filename: 'nstdata-ai-n8n-nodes-nstdata-1.0.0.tgz',
             sha256: hash(bytes), integrity: `sha512-${hash(bytes, 'sha512', 'base64')}` };
         const text = JSON.stringify(manifest);
         fs.writeFileSync(path.join(directory, 'manifest.json'), text);
@@ -96,7 +96,7 @@ test('registry preflight requires one 404 and rejects existing versions or reque
     let reads = 0;
     await checkRegistry(pkg.version, async (url, options) => {
         reads++;
-        assert.equal(url, 'https://registry.npmjs.org/n8n-nodes-nstdata/1.0.0');
+        assert.equal(url, 'https://registry.npmjs.org/%40nstdata-ai%2Fn8n-nodes-nstdata/1.0.0');
         assert.deepEqual(options.headers, {});
         return response({}, 404);
     });
@@ -119,7 +119,7 @@ test('publish CLI completes on npm acceptance without polling or installation an
     try {
         const current = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
         const bytes = Buffer.from('fixture archive');
-        const manifest = { name: current.name, version: current.version, commit, filename: `n8n-nodes-nstdata-${current.version}.tgz`,
+        const manifest = { name: current.name, version: current.version, commit, filename: `nstdata-ai-n8n-nodes-nstdata-${current.version}.tgz`,
             sha256: hash(bytes), integrity: `sha512-${hash(bytes, 'sha512', 'base64')}` };
         const text = JSON.stringify(manifest);
         const archive = path.join(directory, manifest.filename);
@@ -151,7 +151,7 @@ test('publish CLI completes on npm acceptance without polling or installation an
                 let data,status=200;
                 if(url.includes('/deployment-branch-policies?')) data=${JSON.stringify(policies)};
                 else if(url==='https://api.github.com/repos/nstdata-ai/n8n-nodes-nstdata/environments/npm-production') data=${JSON.stringify(environment)};
-                else if(url==='https://registry.npmjs.org/n8n-nodes-nstdata/${manifest.version}') {
+                else if(url==='https://registry.npmjs.org/%40nstdata-ai%2Fn8n-nodes-nstdata/${manifest.version}') {
                     status=Number(process.env.RELEASE_TEST_REGISTRY_STATUS);data={};
                 } else throw new Error('Unexpected network request');
                 return {status,json:async()=>data};
@@ -197,7 +197,7 @@ test('publish CLI completes on npm acceptance without polling or installation an
 
 test('trusted publishing refuses unavailable package metadata before the first automated release', async () => {
     await checkPackage(async (url, options) => {
-        assert.equal(url, 'https://registry.npmjs.org/n8n-nodes-nstdata/latest');
+        assert.equal(url, 'https://registry.npmjs.org/%40nstdata-ai%2Fn8n-nodes-nstdata/latest');
         assert.deepEqual(options.headers, {});
         return response({ name: pkg.name });
     });
@@ -221,7 +221,7 @@ test('prepare checks the exact packed archive before writing its approval manife
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'nstdata-release-prepare-'));
     try {
         const current = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-        const filename = `n8n-nodes-nstdata-${current.version}.tgz`;
+        const filename = `nstdata-ai-n8n-nodes-nstdata-${current.version}.tgz`;
         const bytes = Buffer.from('synthetic prepared archive');
         const bin = path.join(directory, 'bin');
         fs.mkdirSync(bin);
@@ -244,9 +244,9 @@ test('prepare checks the exact packed archive before writing its approval manife
                 let status=200,data;
                 if(url.includes('/deployment-branch-policies?'))data=${JSON.stringify(policies)};
                 else if(url==='https://api.github.com/repos/nstdata-ai/n8n-nodes-nstdata/environments/npm-production')data=${JSON.stringify(environment)};
-                else if(url==='https://registry.npmjs.org/n8n-nodes-nstdata/latest') {
+                else if(url==='https://registry.npmjs.org/%40nstdata-ai%2Fn8n-nodes-nstdata/latest') {
                     status=process.env.RELEASE_TEST_UNAVAILABLE==='1'?404:200;data={name:'${current.name}'};
-                } else if(url==='https://registry.npmjs.org/n8n-nodes-nstdata/${current.version}')status=404;
+                } else if(url==='https://registry.npmjs.org/%40nstdata-ai%2Fn8n-nodes-nstdata/${current.version}')status=404;
                 else throw new Error('Unexpected request');
                 return {status,json:async()=>data};
             };
