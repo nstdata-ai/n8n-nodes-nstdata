@@ -1,5 +1,5 @@
 {
-  "node": "n8n-nodes-nstdata.nstdataCrawl",
+  "node": "@nstdata-ai/n8n-nodes-nstdata.nstdataCrawl",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
   "categories": ["Data & Storage"],
