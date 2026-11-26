@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const repository = 'nstdata-ai/n8n-nodes-nstdata';
-const name = 'n8n-nodes-nstdata';
+const name = '@nstdata-ai/n8n-nodes-nstdata';
 const registry = 'https://registry.npmjs.org';
 const hash = (bytes, algorithm = 'sha256', encoding = 'hex') => createHash(algorithm).update(bytes).digest(encoding);
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -62,7 +62,7 @@ function verifyArtifact(directory, env) {
     assert.equal(manifest.commit, env.GITHUB_SHA);
     assert.equal(manifest.version, env.RELEASE_VERSION);
     assert.equal(manifest.name, name);
-    assert.equal(manifest.filename, `n8n-nodes-nstdata-${env.RELEASE_VERSION}.tgz`);
+    assert.equal(manifest.filename, `nstdata-ai-n8n-nodes-nstdata-${env.RELEASE_VERSION}.tgz`);
     const archive = path.join(directory, manifest.filename);
     const bytes = fs.readFileSync(archive);
     assert.equal(hash(bytes), manifest.sha256, 'Archive changed after checks');
@@ -127,7 +127,7 @@ async function main(mode, directory, env = process.env) {
         const [packed] = JSON.parse(npm(['pack', '--ignore-scripts', '--json', '--pack-destination', directory]));
         assert.equal(packed.name, name);
         assert.equal(packed.version, env.RELEASE_VERSION);
-        assert.equal(packed.filename, `n8n-nodes-nstdata-${env.RELEASE_VERSION}.tgz`);
+        assert.equal(packed.filename, `nstdata-ai-n8n-nodes-nstdata-${env.RELEASE_VERSION}.tgz`);
         const archive = path.join(directory, packed.filename);
         npm(['run', 'check:package', '--', archive]);
         const bytes = fs.readFileSync(archive);
