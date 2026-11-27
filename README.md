@@ -1,14 +1,36 @@
-# Nstdata Crawl for n8n
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nstdata-ai/nstdata-mcp-server/45fd0e479df7509165e3e8d6adbc32503c5d1010/docs/assets/mcp-banner.png" alt="Nstdata — Power AI Agent with Internet Data" width="960">
+</p>
 
-[Simplified Chinese guide](https://github.com/nstdata-ai/n8n-nodes-nstdata/blob/main/GUIDE.zh-CN.md)
+<h1 align="center">Nstdata Crawl for n8n</h1>
 
-Turn a URL from a spreadsheet, webhook or previous n8n step into Markdown, HTML or a list of links. **Nstdata Crawl** submits one page per incoming item. You can wait for the content in the same step or retrieve it later using its task ID.
+<p align="center">
+Turn URLs from a spreadsheet or webhook into Markdown, HTML, or links for the next step in your n8n workflow.
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@nstdata-ai/n8n-nodes-nstdata"><img src="https://img.shields.io/npm/v/%40nstdata-ai%2Fn8n-nodes-nstdata?logo=npm" alt="npm package version"></a>
+  <a href="https://github.com/nstdata-ai/n8n-nodes-nstdata/actions/workflows/check.yml"><img src="https://img.shields.io/github/actions/workflow/status/nstdata-ai/n8n-nodes-nstdata/check.yml?branch=main&amp;label=checks" alt="Repository checks on main"></a>
+  <a href="https://github.com/nstdata-ai/n8n-nodes-nstdata/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <a href="https://app.nstdata.io/"><img src="https://img.shields.io/badge/Dashboard-4F46E5?style=for-the-badge&amp;logo=googlechrome&amp;logoColor=white" alt="Nstdata dashboard"></a>
+  <a href="https://docs.nstdata.io/docs/crawl/"><img src="https://img.shields.io/badge/Crawl_API_Docs-2563EB?style=for-the-badge&amp;logo=readthedocs&amp;logoColor=white" alt="Crawl API documentation"></a>
+  <a href="https://discord.gg/sMsfTzCpe7"><img src="https://img.shields.io/badge/Join_our_Discord-5865F2?style=for-the-badge&amp;logo=discord&amp;logoColor=white" alt="Join our Discord"></a>
+  <a href="https://x.com/nstdata"><img src="https://img.shields.io/badge/Follow_on_X-000000?style=for-the-badge&amp;logo=x&amp;logoColor=white" alt="Follow Nstdata on X"></a>
+</p>
+
+[English](https://github.com/nstdata-ai/n8n-nodes-nstdata#readme) · [Simplified Chinese](https://github.com/nstdata-ai/n8n-nodes-nstdata/blob/main/GUIDE.zh-CN.md)
+
+---
 
 ## Choose your n8n setup
 
-The installation steps and coffee digest below run on self-hosted n8n with community nodes enabled. On n8n Cloud, check whether the owner or an admin can install **Nstdata Crawl** from the nodes panel. If it is unavailable, you can call the Crawl API with n8n’s built-in HTTP Request node and your own API key.
+- **Self-hosted n8n.** An owner or admin can open **Settings → Community nodes → Install**, enter `@nstdata-ai/n8n-nodes-nstdata`, and confirm installation. Your instance must allow unverified community nodes. After installation, add **Nstdata Crawl** to your workflow and select a Crawl API key. [n8n installation guide](https://docs.n8n.io/integrations/community-nodes/installation-and-management/gui-installation/)
+- **n8n Cloud.** The node is published on npm and is under review for the n8n verified directory. In the meantime, use the built-in **HTTP Request** node to call the Crawl API with your Nstdata API key.
 
-We are preparing the npm release and plan to submit the node to n8n for verification shortly after publication. Once approved and listed, instance owners or admins with verified community nodes enabled can find and install **Nstdata Crawl** from the canvas.
+Once installed, the node submits one page per input item. Wait for the content in the same step or pass the task ID downstream. The [daily coffee digest](#example-workflow--daily-coffee-digest) shows how to turn product pages into a scheduled email.
 
 ## Package name
 

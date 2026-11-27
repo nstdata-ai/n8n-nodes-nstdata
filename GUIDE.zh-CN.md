@@ -1,14 +1,36 @@
-# 在 n8n 中使用 Nstdata Crawl
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nstdata-ai/nstdata-mcp-server/45fd0e479df7509165e3e8d6adbc32503c5d1010/docs/assets/mcp-banner.png" alt="Nstdata — Power AI Agent with Internet Data" width="960">
+</p>
 
-[English](README.md)
+<h1 align="center">Nstdata Crawl for n8n</h1>
 
-把表格、Webhook 或上游节点中的网页地址交给 **Nstdata Crawl**，就能在工作流中得到 Markdown 正文、HTML 或链接列表。每条输入记录对应一个抓取任务。你可以在同一个节点等待正文，也可以先拿到任务 ID，稍后再查询。
+<p align="center">
+把表格或 Webhook 传来的网址抓取成 Markdown、HTML 或链接列表，交给下一个 n8n 节点。
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@nstdata-ai/n8n-nodes-nstdata"><img src="https://img.shields.io/npm/v/%40nstdata-ai%2Fn8n-nodes-nstdata?logo=npm" alt="npm 包版本"></a>
+  <a href="https://github.com/nstdata-ai/n8n-nodes-nstdata/actions/workflows/check.yml"><img src="https://img.shields.io/github/actions/workflow/status/nstdata-ai/n8n-nodes-nstdata/check.yml?branch=main&amp;label=checks" alt="main 分支自动检查"></a>
+  <a href="https://github.com/nstdata-ai/n8n-nodes-nstdata/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT 许可证"></a>
+</p>
+
+<p align="center">
+  <a href="https://app.nstdata.io/"><img src="https://img.shields.io/badge/Dashboard-4F46E5?style=for-the-badge&amp;logo=googlechrome&amp;logoColor=white" alt="Nstdata 控制台"></a>
+  <a href="https://docs.nstdata.io/zh-CN/docs/crawl/"><img src="https://img.shields.io/badge/Crawl_API_Docs-2563EB?style=for-the-badge&amp;logo=readthedocs&amp;logoColor=white" alt="Crawl API 文档"></a>
+  <a href="https://discord.gg/sMsfTzCpe7"><img src="https://img.shields.io/badge/Join_our_Discord-5865F2?style=for-the-badge&amp;logo=discord&amp;logoColor=white" alt="加入 Discord"></a>
+  <a href="https://x.com/nstdata"><img src="https://img.shields.io/badge/Follow_on_X-000000?style=for-the-badge&amp;logo=x&amp;logoColor=white" alt="在 X 上关注 Nstdata"></a>
+</p>
+
+[English](https://github.com/nstdata-ai/n8n-nodes-nstdata#readme) · [简体中文](https://github.com/nstdata-ai/n8n-nodes-nstdata/blob/main/GUIDE.zh-CN.md)
+
+---
 
 ## 先选择你的 n8n 部署方式
 
-下面的安装步骤和咖啡晨报适用于已启用社区节点的自托管 n8n。使用 n8n Cloud 时，请先让所有者或管理员查看能否在节点面板安装 **Nstdata Crawl**。如果面板里没有该节点，可以使用内置 HTTP Request 节点和自己的 API Key 调用 Crawl API。
+- **自托管 n8n。** 实例允许安装未验证社区节点时，所有者或管理员可打开 **Settings → Community nodes → Install**，输入 `@nstdata-ai/n8n-nodes-nstdata` 并确认安装。随后在工作流中添加 **Nstdata Crawl**，选择自己的 Crawl API Key 凭据。[n8n 安装说明](https://docs.n8n.io/integrations/community-nodes/installation-and-management/gui-installation/)
+- **n8n Cloud。** 节点已发布到 npm，正在等待 n8n 官方节点目录审核。审核期间，可使用内置 **HTTP Request** 节点，填入自己的 Nstdata API Key 调用 Crawl API。
 
-我们正准备发布 npm 包，随后将尽快向 n8n 提交官方节点验证申请。通过审核并被目录收录后，已启用 Verified community nodes 的实例可由所有者或管理员直接在画布搜索、安装 **Nstdata Crawl**。
+安装后，每条输入记录对应一个网页抓取任务。你可以在当前节点等正文，也可以把任务 ID 传给下游稍后查询。[每日咖啡晨报示例](#示例工作流--每日咖啡晨报)展示了如何把商品页整理成一封定时邮件。
 
 ## 包名和已有工作流
 
